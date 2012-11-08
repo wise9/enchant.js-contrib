@@ -1,4 +1,10 @@
-# enchant.contrib
+## enchantjs-contrib
 
-This is repository for enchant.js plugins. Please you can send pull request and we add you as repository collaborator.
+This is collection repository of enchant.js plugins. semi-officially supported.
+
+Before sending pull request, please check:
+
+- your commit includes qunit tests
+- your codes are jshint-free (with some options ;)
+- you've added configuration for your code to grunt.js
 
