@@ -2,6 +2,7 @@
 
 This is collection repository of enchant.js plugins. semi-officially supported.
 
+## checklist
 Before sending pull request, please check:
 
 - your commit includes qunit tests
