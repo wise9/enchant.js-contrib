@@ -1,0 +1,1 @@
+// sample.enchant.js
