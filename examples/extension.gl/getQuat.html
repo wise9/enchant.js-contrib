@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<meta charset=utf-8>
+<body style="margin:0">
+<script type="text/javascript" src="../../dependencies/gl-matrix-min.js"></script>
+<script type="text/javascript" src="../../dependencies/enchant.min.js"></script>
+<script type="text/javascript" src="../../dependencies/gl.enchant.js"></script>
+<script type="text/javascript" src="../../dependencies/primitive.gl.enchant.js"></script>
+<script type="text/javascript" src="../../dev/plugins/extension.gl.enchant.js"></script>
+<script type="text/javascript">
+enchant();
+window.onload = function() {
+    var game = new Core();
+    game.preload("arrow.png");
+    game.on("load", function() {
+        var scene = new Scene3D();
+        scene.backgroundColor = [1, 1, 1, 1];
+
+        // 操作によって回転する立方体
+        var c1 = new Cube();
+        scene.addChild(c1);
+        c1.x = -0.8;
+        c1.on("enterframe", function() {
+            if (game.input.up) {
+                this.rotation = mat4.rotateX(this.rotation, -0.1)
+            } else if (game.input.down) {
+                this.rotation = mat4.rotateX(this.rotation, 0.1)
+            }
+            if (game.input.left) {
+                this.rotation = mat4.rotateY(this.rotation, -0.1)
+            } else if (game.input.right) {
+                this.rotation = mat4.rotateY(this.rotation, 0.1)
+            }
+        });
+
+        // c1の姿勢を真似する立方体
+        var c2 = new Cube();
+        scene.addChild(c2);
+        c2.x = 0.8;
+        c2.on("enterframe", function() {
+            // c1の姿勢をクォータニオンの形式で取得する
+            var quat = c1.getQuat();
+            // 取得した姿勢をセットする
+            this.rotationSet(quat);
+        });
+
+        // 操作盤
+        var s2d = game.rootScene;
+        var buttons = {};
+        var up = buttons.up = new Sprite(32, 32);
+        up.x = 80; up.y = 240;
+        s2d.addChild(up);
+        var down = buttons.down = new Sprite(32, 32);
+        down.x = 80; down.y = 274;
+        s2d.addChild(down);
+        var left = buttons.left = new Sprite(32, 32);
+        left.x = 46; left.y = 274;
+        s2d.addChild(left);
+        var right = buttons.right = new Sprite(32, 32);
+        right.x = 114; right.y = 274;
+        s2d.addChild(right);
+        ["up", "down", "left", "right"].forEach(function(b, i) {
+            var name = b;
+            buttons[b].image = game.assets["arrow.png"];
+            buttons[b].frame = i;
+            buttons[b].on("touchstart", function() {
+                game.input[name] = true;
+            });
+            buttons[b].on("touchend", function() {
+                game.input[name] = false;
+            });
+        });
+
+    });
+    game.start();
+};
+</script>
+</body>
+</html>
