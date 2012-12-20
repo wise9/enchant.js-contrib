@@ -11,7 +11,7 @@
  *
  * @detail
  * AABB2: 幅・高さ・奥行きを個別に設定可能なAABB.
- * Sprite3D#tl: タイムラインアニメーションをSprite3Dで利用可能にする.
+ * Sprite3D#tl: タイムラインアニメーションをSprite3Dで利用可能にするプロパティ.
  * 
  [/lang]
  [lang:en]
@@ -19,6 +19,13 @@
  * @version 0.0.1
  * @require gl.enchant.js v0.3.7
  * @author daishi_hmr
+ *
+ * @description
+ * gl.enchant.js extension library.
+ *
+ * @detail
+ * AABB2: can be set height, width and depth individually.
+ * Sprite3D#tl: for using Timeline Animation.
  [/lang]
  */
 
@@ -34,13 +41,17 @@ enchant.gl.extension = {};
 // #################################################################
 
 /**
- * 3Dワールド座標を2Dスクリーン座標に変換.
+ [lang:ja]
+ * 3Dワールド座標を2Dスクリーン座標に変換する.
+ [/lang]
+ [lang:en]
+ * transform 3D world coordinates to 2D screen coordinates.
+ [/lang]
  */
 enchant.gl.extension.toScreenCoord = function(x, y, z) {
     var game = enchant.Game.instance;
     var camera = game.currentScene3D.getCamera();
 
-    // プロジェクション行列
     var pm = mat4.perspective(20, game.width / game.height, 1.0, 1000.0);
     var vm = mat4.lookAt([ camera._x, camera._y, camera._z ], [
             camera._centerX, camera._centerY, camera._centerZ ], [
@@ -60,7 +71,7 @@ enchant.gl.extension.toScreenCoord = function(x, y, z) {
  * クォータニオン同士の積.
  */
 enchant.gl.Quat.prototype.multiply = function(another) {
-    var q = new Quat(0, 0, 0, 0);
+    var q = new enchant.gl.Quat(0, 0, 0, 0);
     quat4.multiply(this._quat, another._quat, q._quat);
     return q;
 };
@@ -97,7 +108,7 @@ enchant.gl.extension.mat4ToQuat = function(m, q) {
             q[1] = (m[1] + m[4]) * s;
             q[2] = (m[8] + m[2]) * s;
             q[3] = (m[6] - m[9]) * s;
-        } else if (max == m[5]) {
+        } else if (max === m[5]) {
             s = Math.sqrt(m[5] - (m[10] + m[0]) + 1.0);
             var y = s * 0.5;
             s = 0.5 / s;
@@ -131,7 +142,7 @@ enchant.gl.extension.mat4ToQuat = function(m, q) {
  * 現在の姿勢をクォータニオンで取得する.
  */
 enchant.gl.Sprite3D.prototype.getQuat = function() {
-    var quat = new Quat();
+    var quat = new enchant.gl.Quat();
     quat._quat = enchant.gl.extension.mat4ToQuat(this._rotation);
     return quat;
 };
@@ -156,10 +167,10 @@ enchant.gl.Sprite3D.prototype.getWorldCoord = function() {
     } else {
         this.globalCoordCache = {
             frame : game.frame
-        }
+        };
     }
 
-    var m = baseMatrix(this)
+    var m = baseMatrix(this);
 
     this.globalCoordCache.coord = { x: m[12], y: m[13], z: m[14] };
     return this.globalCoordCache.coord;
@@ -177,7 +188,7 @@ enchant.gl.Sprite3D.prototype.getScreenCoord = function() {
     } else {
         this.screenCoordCache = {
             frame : game.frame
-        }
+        };
     }
 
     var scene = game.currentScene3D;
@@ -202,7 +213,7 @@ enchant.gl.Sprite3D.prototype.getScreenCoord = function() {
     var orig = enchant.gl.Sprite3D.prototype.initialize;
     enchant.gl.Sprite3D.prototype.initialize = function() {
         orig.apply(this, arguments);
-        if(enchant.ENV.USE_ANIMATION){
+        if (enchant.ENV.USE_ANIMATION) {
             var tl = this.tl = new enchant.gl.extension.Timeline(this);
         }
     };
@@ -229,13 +240,13 @@ enchant.gl.extension.Tween = enchant.Class.create(enchant.Action, {
                 if (params.hasOwnProperty(prop)) {
                     // 値の代わりに関数が入っていた場合評価した結果を用いる
                     var target_val;
-                    if (typeof params[prop] == "function") {
+                    if (typeof params[prop] === "function") {
                         target_val = params[prop].call(tween.node);
                     } else {
                         target_val = params[prop];
                     }
 
-                    if (excepted.indexOf(prop) == -1) {
+                    if (excepted.indexOf(prop) === -1) {
                         origin[prop] = tween.node[prop];
                         target[prop] = target_val;
                     }
@@ -251,8 +262,9 @@ enchant.gl.extension.Tween = enchant.Class.create(enchant.Action, {
         this.addEventListener(enchant.Event.ACTION_TICK, function(evt) {
             for ( var prop in target) {
                 if (target.hasOwnProperty(prop)) {
+                    var ratio;
                     if (prop === "quat") {
-                        var ratio = tween.easing(tween.frame, 0, 1, tween.time);
+                        ratio = tween.easing(tween.frame, 0, 1, tween.time);
                         if (1 - ratio < 10e-8) {
                             ratio = 1;
                         }
@@ -263,7 +275,7 @@ enchant.gl.extension.Tween = enchant.Class.create(enchant.Action, {
                             continue;
                         }
                         // if time is 0, set property to target value immediately
-                        var ratio = tween.time === 0 ? 1 : tween.easing(Math.min(tween.time,tween.frame + evt.elapsed), 0, 1, tween.time) - tween.easing(tween.frame, 0, 1, tween.time);
+                        ratio = tween.time === 0 ? 1 : tween.easing(Math.min(tween.time,tween.frame + evt.elapsed), 0, 1, tween.time) - tween.easing(tween.frame, 0, 1, tween.time);
                         tween.node[prop] += (target[prop] - origin[prop]) * ratio;
                         if (Math.abs(tween.node[prop]) < 10e-8){
                             tween.node[prop] = 0;
@@ -301,13 +313,13 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
     moveBy : function(x, y, z, time, easing) {
         return this.tween({
             x : function() {
-                return this.x + x
+                return this.x + x;
             },
             y : function() {
-                return this.y + y
+                return this.y + y;
             },
             z : function() {
-                return this.z + z
+                return this.z + z;
             },
             time : time,
             easing : easing
@@ -335,13 +347,13 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
         if (typeof easing === "number") {
             return this.tween({
                 scaleX : function() {
-                    return this.scaleX * arguments[0]
+                    return this.scaleX * arguments[0];
                 },
                 scaleY : function() {
-                    return this.scaleY * arguments[1]
+                    return this.scaleY * arguments[1];
                 },
                 scaleZ : function() {
-                    return this.scaleZ * arguments[2]
+                    return this.scaleZ * arguments[2];
                 },
                 time : arguments[3],
                 easing : arguments[4]
@@ -349,13 +361,13 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
         }
         return this.tween({
             scaleX : function() {
-                return this.scaleX * scale
+                return this.scaleX * scale;
             },
             scaleY : function() {
-                return this.scaleY * scale
+                return this.scaleY * scale;
             },
             scaleZ : function() {
-                return this.scaleZ * scale
+                return this.scaleZ * scale;
             },
             time : time,
             easing : easing
@@ -371,29 +383,29 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
     rotateBy : function(quat, time, easing) {
         return this.tween({
             quat : function() {
-                return this.getQuat().multiply(quat)
+                return this.getQuat().multiply(quat);
             },
             time : time,
             easing : easing
         });
     },
     rotatePitchTo : function(angle, time, easing) {
-        return this.rotateTo(new Quat(1, 0, 0, angle), time, easing);
+        return this.rotateTo(new enchant.gl.Quat(1, 0, 0, angle), time, easing);
     },
     rotateYawTo : function(angle, time, easing) {
-        return this.rotateTo(new Quat(0, 1, 0, angle), time, easing);
+        return this.rotateTo(new enchant.gl.Quat(0, 1, 0, angle), time, easing);
     },
     rotateRollTo : function(angle, time, easing) {
-        return this.rotateTo(new Quat(0, 0, 1, angle), time, easing);
+        return this.rotateTo(new enchant.gl.Quat(0, 0, 1, angle), time, easing);
     },
     rotatePitchBy : function(angle, time, easing) {
-        return this.rotateBy(new Quat(1, 0, 0, angle), time, easing);
+        return this.rotateBy(new enchant.gl.Quat(1, 0, 0, angle), time, easing);
     },
     rotateYawBy : function(angle, time, easing) {
-        return this.rotateBy(new Quat(0, 1, 0, angle), time, easing);
+        return this.rotateBy(new enchant.gl.Quat(0, 1, 0, angle), time, easing);
     },
     rotateRollBy : function(angle, time, easing) {
-        return this.rotateBy(new Quat(0, 0, 1, angle), time, easing);
+        return this.rotateBy(new enchant.gl.Quat(0, 0, 1, angle), time, easing);
     }
 });
 
@@ -449,8 +461,7 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
         var nx2 = aabb2.parent.x + (aabb2.x - aabb2.scaleX);
         var ny2 = aabb2.parent.y + (aabb2.y - aabb2.scaleY);
         var nz2 = aabb2.parent.z + (aabb2.z - aabb2.scaleZ);
-        return ((nx2 <= px1) && (nx1 <= px2) && (ny2 <= py1) && (ny1 <= py2)
-                && (nz2 <= pz1) && (nz1 <= pz2)) ? 0.0 : 1.0;
+        return ((nx2 <= px1) && (nx1 <= px2) && (ny2 <= py1) && (ny1 <= py2) && (nz2 <= pz1) && (nz1 <= pz2)) ? 0.0 : 1.0;
     };
     var AABB22AABB2 = function(aabb1, aabb2) {
         var px1 = aabb1.parent.x + aabb1.x + aabb1.scaleX;
@@ -468,8 +479,7 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
         var nx2 = aabb2.parent.x + (aabb2.x - aabb2.scaleX);
         var ny2 = aabb2.parent.y + (aabb2.y - aabb2.scaleY);
         var nz2 = aabb2.parent.z + (aabb2.z - aabb2.scaleZ);
-        return ((nx2 <= px1) && (nx1 <= px2) && (ny2 <= py1) && (ny1 <= py2)
-                && (nz2 <= pz1) && (nz1 <= pz2)) ? 0.0 : 1.0;
+        return ((nx2 <= px1) && (nx1 <= px2) && (ny2 <= py1) && (ny1 <= py2) && (nz2 <= pz1) && (nz1 <= pz2)) ? 0.0 : 1.0;
     };
 
     enchant.gl.collision.Bounding.prototype.intersect = function(another) {
