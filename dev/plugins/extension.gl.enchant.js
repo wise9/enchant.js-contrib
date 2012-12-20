@@ -36,7 +36,7 @@ enchant.gl.extension = {};
 
 // #################################################################
 // #
-// # utility
+// # Utility
 // #
 // #################################################################
 
@@ -68,7 +68,12 @@ enchant.gl.extension.toScreenCoord = function(x, y, z) {
 };
 
 /**
+ [lang:ja]
  * クォータニオン同士の積.
+ [/lang]
+ [lang:en]
+ * multiply quaternion and quaternion.
+ [/lang]
  */
 enchant.gl.Quat.prototype.multiply = function(another) {
     var q = new enchant.gl.Quat(0, 0, 0, 0);
@@ -77,7 +82,12 @@ enchant.gl.Quat.prototype.multiply = function(another) {
 };
 
 /**
+ [lang:ja]
  * 回転行列をクォータニオンに変換.
+ [/lang]
+ [lang:en]
+ * transform rotationMatrix to Quaternion.
+ [/lang]
  */
 enchant.gl.extension.mat4ToQuat = function(m, q) {
     if (!q) {
@@ -134,12 +144,19 @@ enchant.gl.extension.mat4ToQuat = function(m, q) {
 
 // #################################################################
 // #
-// # Sprite3Dの拡張
+// # Sprite3D Extension
 // #
 // #################################################################
 
 /**
+ [lang:ja]
  * 現在の姿勢をクォータニオンで取得する.
+ [/lang]
+ [lang:en]
+ * get current attitude as quaternion.
+ [/lang]
+ *
+ * @scope enchant.gl.Sprite3D.prototype
  */
 enchant.gl.Sprite3D.prototype.getQuat = function() {
     var quat = new enchant.gl.Quat();
@@ -148,7 +165,14 @@ enchant.gl.Sprite3D.prototype.getQuat = function() {
 };
 
 /**
+ [lang:ja]
  * ワールド座標を返す.
+ [/lang]
+ [lang:en]
+ * return world coordinates.
+ [/lang]
+ *
+ * @scope enchant.gl.Sprite3D.prototype
  */
 enchant.gl.Sprite3D.prototype.getWorldCoord = function() {
     function baseMatrix(s3d) {
@@ -177,7 +201,14 @@ enchant.gl.Sprite3D.prototype.getWorldCoord = function() {
 };
 
 /**
+ [lang:ja]
  * スクリーン上の座標を返す.
+ [/lang]
+ [lang:en]
+ * return screen coordinates.
+ [/lang]
+ *
+ * @scope enchant.gl.Sprite3D.prototype
  */
 enchant.gl.Sprite3D.prototype.getScreenCoord = function() {
     var game = enchant.Game.instance;
@@ -205,11 +236,11 @@ enchant.gl.Sprite3D.prototype.getScreenCoord = function() {
 
 // #################################################################
 // #
-// # タイムラインアニメーション
+// # Timeline Animation
 // #
 // #################################################################
 (function(enchant) {
-    // Sprite3Dのコンストラクタを拡張
+    // extend Sprite3D constructor
     var orig = enchant.gl.Sprite3D.prototype.initialize;
     enchant.gl.Sprite3D.prototype.initialize = function() {
         orig.apply(this, arguments);
@@ -219,6 +250,9 @@ enchant.gl.Sprite3D.prototype.getScreenCoord = function() {
     };
 })(enchant);
 
+/**
+ * @scope enchant.gl.extension.Tween.prototype
+ */
 enchant.gl.extension.Tween = enchant.Class.create(enchant.Action, {
     initialize : function(params) {
         var origin = {};
@@ -287,6 +321,9 @@ enchant.gl.extension.Tween = enchant.Class.create(enchant.Action, {
     }
 });
 
+/**
+ * @scope enchant.gl.extension.Timeline.prototype
+ */
 enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
     initialize : function(node) {
         enchant.Timeline.call(this, node);
@@ -294,6 +331,16 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
     tween : function(params) {
         return this.add(new enchant.gl.extension.Tween(params));
     },
+    /**
+     * [lang:ja]
+     * Sprite3D の位置をなめらかに移動させるアクションを追加する。
+     * @param x 目標のx座標
+     * @param y 目標のy座標
+     * @param z 目標のz座標
+     * @param time フレーム数
+     * @param [easing] イージング関数
+     * [/lang]
+     */
     moveTo : function(x, y, z, time, easing) {
         return this.tween({
             x : x,
@@ -303,6 +350,14 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
             easing : easing
         });
     },
+    /**
+     * [lang:ja]
+     * Sprite3D のz座標をなめらかに変化させるアクションを追加する。
+     * @param z
+     * @param time
+     * @param [easing]
+     * [/lang]
+     */
     moveZ : function(z, time, easing) {
         return this.tween({
             z : z,
@@ -310,6 +365,17 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
             easing : easing
         });
     },
+    /**
+     * [lang:ja]
+     * Sprite3D の位置をなめらかに変化させるアクションを追加する。
+     * 座標は、アクション開始時からの相対座標で指定する。
+     * @param x
+     * @param y
+     * @param z
+     * @param time
+     * @param [easing]
+     * [/lang]
+     */
     moveBy : function(x, y, z, time, easing) {
         return this.tween({
             x : function() {
@@ -325,6 +391,16 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
             easing : easing
         });
     },
+    /**
+     * [lang:ja]
+     * Sprite3D をなめらかに拡大・縮小するアクションを追加する。
+     * @param scaleX 縮尺
+     * @param [scaleY] 縮尺。省略した場合 scaleX と同じ
+     * @param [scaleZ] 縮尺。省略した場合 scaleX と同じ
+     * @param time
+     * @param [easing]
+     * [/lang]
+     */
     scaleTo : function(scale, time, easing) {
         if (typeof easing === "number") {
             return this.tween({
@@ -343,6 +419,17 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
             easing : easing
         });
     },
+    /**
+     * [lang:ja]
+     * Sprite3D をなめらかに拡大・縮小させるアクションを追加する。
+     * 相対縮尺 (ex. アクション開始時の縮尺の n 倍) で指定する。
+     * @param scaleX 相対縮尺
+     * @param [scaleY] 相対縮尺。省略した場合 scaleX と同じ
+     * @param [scaleZ] 相対縮尺。省略した場合 scaleZ と同じ
+     * @param time
+     * @param [easing]
+     * [/lang]
+     */
     scaleBy : function(scale, time, easing) {
         if (typeof easing === "number") {
             return this.tween({
@@ -373,6 +460,14 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
             easing : easing
         });
     },
+    /**
+     * [lang:ja]
+     * Sprite3D をなめらかに回転させるアクションを追加する。
+     * @param quat 目標の姿勢。クォータニオンで指定する
+     * @param time フレーム数
+     * @param [easing] イージング関数
+     * [/lang]
+     */
     rotateTo : function(quat, time, easing) {
         return this.tween({
             quat : quat,
@@ -380,6 +475,15 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
             easing : easing
         });
     },
+    /**
+     * [lang:ja]
+     * Sprite3D をなめらかに回転させるアクションを追加する。
+     * 姿勢は相対角度 (アクション開始時の姿勢から更に回転) で指定する
+     * @param quat 目標の姿勢。クォータニオンで指定する
+     * @param time フレーム数
+     * @param [easing] イージング関数
+     * [/lang]
+     */
     rotateBy : function(quat, time, easing) {
         return this.tween({
             quat : function() {
@@ -389,21 +493,72 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
             easing : easing
         });
     },
+    /**
+     * [lang:ja]
+     * Sprite3D をなめらかにX軸回転させるアクションを追加する。
+     * @param angle 目標の角度 (ラジアン: 1回転を PI*2 とする)
+     * @param time フレーム数
+     * @param [easing] イージング関数
+     * [/lang]
+     */
     rotatePitchTo : function(angle, time, easing) {
         return this.rotateTo(new enchant.gl.Quat(1, 0, 0, angle), time, easing);
     },
+    /**
+     * [lang:ja]
+     * Sprite3D をなめらかにY軸回転させるアクションを追加する。
+     * @param angle 目標の角度 (ラジアン: 1回転を PI*2 とする)
+     * @param time フレーム数
+     * @param [easing] イージング関数
+     * [/lang]
+     */
     rotateYawTo : function(angle, time, easing) {
         return this.rotateTo(new enchant.gl.Quat(0, 1, 0, angle), time, easing);
     },
+    /**
+     * [lang:ja]
+     * Sprite3D をなめらかにZ軸回転させるアクションを追加する。
+     * @param angle 目標の角度 (ラジアン: 1回転を PI*2 とする)
+     * @param time フレーム数
+     * @param [easing] イージング関数
+     * [/lang]
+     */
     rotateRollTo : function(angle, time, easing) {
         return this.rotateTo(new enchant.gl.Quat(0, 0, 1, angle), time, easing);
     },
+    /**
+     * [lang:ja]
+     * Sprite3D をなめらかにX軸回転させるアクションを追加する。
+     * 角度は相対角度 (アクション開始時の角度から更に n 度) で指定する
+     * @param angle 目標の相対角度 (ラジアン: 1回転を PI*2 とする)
+     * @param time フレーム数
+     * @param [easing] イージング関数
+     * [/lang]
+     */
     rotatePitchBy : function(angle, time, easing) {
         return this.rotateBy(new enchant.gl.Quat(1, 0, 0, angle), time, easing);
     },
+    /**
+     * [lang:ja]
+     * Sprite3D をなめらかにY軸回転させるアクションを追加する。
+     * 角度は相対角度 (アクション開始時の角度から更に n 度) で指定する
+     * @param angle 目標の相対角度 (ラジアン: 1回転を PI*2 とする)
+     * @param time フレーム数
+     * @param [easing] イージング関数
+     * [/lang]
+     */
     rotateYawBy : function(angle, time, easing) {
         return this.rotateBy(new enchant.gl.Quat(0, 1, 0, angle), time, easing);
     },
+    /**
+     * [lang:ja]
+     * Sprite3D をなめらかにZ軸回転させるアクションを追加する。
+     * 角度は相対角度 (アクション開始時の角度から更に n 度) で指定する
+     * @param angle 目標の相対角度 (ラジアン: 1回転を PI*2 とする)
+     * @param time フレーム数
+     * @param [easing] イージング関数
+     * [/lang]
+     */
     rotateRollBy : function(angle, time, easing) {
         return this.rotateBy(new enchant.gl.Quat(0, 0, 1, angle), time, easing);
     }
@@ -413,7 +568,7 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
 
 // #################################################################
 // #
-// # 衝突判定
+// # Collision
 // #
 // #################################################################
 (function(enchant) {
@@ -553,9 +708,14 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
         }
     });
 
+    /**
+     * @scope enchant.gl.collision.NONE.prototype
+     */
     enchant.gl.collision.NONE = enchant.Class.create(enchant.gl.collision.Bounding, {
         /**
+         [lang:ja]
          * 衝突が発生しないBounding.
+         [/lang]
          */
         initialize : function() {
             enchant.gl.collision.Bounding.call(this);
