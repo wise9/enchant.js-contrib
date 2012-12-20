@@ -18,39 +18,49 @@ window.onload = function() {
         var scene2D = game.rootScene;
         var scene3D = new Scene3D();
 
-        // 操作によって回転する立方体
-        var c1 = new Cube();
-        c1.x = -0.8;
-        c1.on("enterframe", function() {
-            if (game.input.up)    this.rotation = mat4.rotateX(this.rotation, -0.1, mat4.create())
-            if (game.input.down)  this.rotation = mat4.rotateX(this.rotation,  0.1, mat4.create())
-            if (game.input.left)  this.rotation = mat4.rotateY(this.rotation, -0.1, mat4.create())
-            if (game.input.right) this.rotation = mat4.rotateY(this.rotation,  0.1, mat4.create())
+        // 親
+        var sprite1 = new Sphere(0.2);
+        sprite1.on("enterframe", function() {
+            if (game.input.up)    this.altitude( 0.1);
+            if (game.input.down)  this.altitude(-0.1);
+            if (game.input.left)  this.rotateRoll(-0.1);
+            if (game.input.right) this.rotateRoll( 0.1);
         });
-        scene3D.addChild(c1);
+        scene3D.addChild(sprite1);
+        // 子
+        var sprite2 = new Sphere(0.2);
+        sprite2.y = 0.5;
+        sprite2.on("enterframe", function() {
+            if (game.input.up)    this.rotatePitch(-0.1);
+            if (game.input.down)  this.rotatePitch( 0.1);
+            if (game.input.left)  this.rotateRoll(-0.1);
+            if (game.input.right) this.rotateRoll( 0.1);
+        });
+        sprite1.addChild(sprite2);
+        // 孫
+        var sprite3 = new Sphere(0.2);
+        sprite3.y = 0.5;
+        sprite2.addChild(sprite3);
 
-        // c1の姿勢を真似する立方体
-        var c2 = new Cube();
-        c2.x = 0.8;
-        scene3D.addChild(c2);
+        // マーカー
+        var marker = new Sprite(32, 32);
+        marker.backgroundColor = "rgba(255, 255, 0, 0.5)";
+        scene2D.addChild(marker);
 
-        // 姿勢をコピーするボタン
-        var copyButton = new Sprite(128, 32);
-        copyButton.x = 190; copyButton.y = 260;
-        copyButton.image = game.assets["button.png"];
-        copyButton.on("touchstart", function() {
+        // ボタン
+        var button = new Sprite(128, 32);
+        button.x = 190; button.y = 260;
+        button.image = game.assets["button.png"];
+        button.on("touchstart", function() {
 
-            // c1の姿勢をクォータニオンの形式で取得する
-            var attitude = c1.getQuat();
+            // 孫のスクリーン座標を取得
+            var s = sprite3.getScreenCoord();
 
-            // c2に姿勢をセットする
-            // c2.rotationSet(attitude);
-
-            // c2の姿勢をattitudeへタイムラインアニメーションで変化させる
-            c2.tl.rotateTo(attitude, 30, enchant.Easing.QUAD_EASEINOUT);
+            // マーカーを孫の位置へ移動させる
+            marker.tl.moveTo(s.x - marker.width/2, s.y - marker.height/2, 30, enchant.Easing.QUAD_EASEINOUT);
 
         });
-        scene2D.addChild(copyButton);
+        scene2D.addChild(button);
 
         // 操作盤
         var buttons = {};

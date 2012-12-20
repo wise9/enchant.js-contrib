@@ -1,11 +1,11 @@
 /**
  * @fileOverview
- [lang:ja]
  * extension.gl.enchant.js
  * @version 0.0.1
  * @require gl.enchant.js v0.3.7
  * @author daishi_hmr
  *
+ [lang:ja]
  * @description
  * gl.enchant.jsを拡張するライブラリ
  *
@@ -15,11 +15,6 @@
  * 
  [/lang]
  [lang:en]
- * extension.gl.enchant.js
- * @version 0.0.1
- * @require gl.enchant.js v0.3.7
- * @author daishi_hmr
- *
  * @description
  * gl.enchant.js extension library.
  *
@@ -49,7 +44,7 @@ enchant.gl.extension = {};
  [/lang]
  */
 enchant.gl.extension.toScreenCoord = function(x, y, z) {
-    var game = enchant.Game.instance;
+    var game = enchant.Core.instance;
     var camera = game.currentScene3D.getCamera();
 
     var pm = mat4.perspective(20, game.width / game.height, 1.0, 1000.0);
@@ -183,7 +178,7 @@ enchant.gl.Sprite3D.prototype.getWorldCoord = function() {
         }
     }
 
-    var game = enchant.Game.instance;
+    var game = enchant.Core.instance;
 
     // キャッシュチェック
     if (this.globalCoordCache && this.globalCoordCache.frame === game.frame) {
@@ -211,7 +206,7 @@ enchant.gl.Sprite3D.prototype.getWorldCoord = function() {
  * @scope enchant.gl.Sprite3D.prototype
  */
 enchant.gl.Sprite3D.prototype.getScreenCoord = function() {
-    var game = enchant.Game.instance;
+    var game = enchant.Core.instance;
 
     // キャッシュチェック
     if (this.screenCoordCache && this.screenCoordCache.frame === game.frame) {
