@@ -698,3 +698,95 @@ enchant.gl.extension.Timeline = enchant.Class.create(enchant.Timeline, {
     });
 
 })(enchant);
+
+(function() {
+
+    enchant.gl.extension.Ground = enchant.Class.create(enchant.gl.primitive.PlaneXZ, {
+        initialize: function(texture) {
+            enchant.gl.primitive.PlaneXZ.call(this, 100, 100);
+            this.mesh.texture.ambient = [1,1,1,1];
+            this.mesh.texture.diffuse = [0,0,0,1];
+            this.mesh.texture.specular = [0,0,0,1];
+            if (texture) this.mesh.texture.src = texture;
+            this.y = -1;
+        }
+    });
+
+    var SHADOW_DATA = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAA\
+    CqaXHeAAADhklEQVR4Xu2bSXLVMBCGX25AbpDAARj3BNgz7kmAPVDFlkCALUUxrIGEPeOa4R2AhHAAI\
+    JwAbgD9udSvVH6xZdnyJFtVXfbzs7tbf7darWlhUn85ICLOCi0bUSvmyvMj5n5Xrn/N/dRcf8n1g/W8\
+    Fk0XauE6mRwWvucNaSXLigKcd4a+l2WS9V1IALDodaE1y9qh9cUrNoWehvKMEABoxW+KUouha5zB748\
+    8fyx0v6q8qgBcFgU2arS4q354BPJfuV4M3QRo4y+EjpUVHPi7HeF3Uei3L98yHnBShLxt0N2L1olmcU\
+    rIK1D6AoDLbxXVqKX3Vn2ahA8Az4Xx1ZYq5SuW5nmtyEdFAXht2lgRnl15540ocsmlTBEA+mT5dH0fy\
+    YNbeSC4AOhDm3cZOTcm5AFAtJ+6uPfkf9LxfXuHLADo5790sKsrizddJDnLXppBFgDb5oOyArv4HcnS\
+    8SIAxNDuswwwFw/SHsDABusf7KIJA+j0U3gcsvmkAViXPyuPsAIoWieLO8L8gQqwAcD6INTUkLbOSub\
+    xJiDi4ckMlA3AEKyvwMy8wAbgR8RtP+0Rs1igAJAofGvLJ1uSe1Tk7ioAt+3A0JJCTYtl/vKZAvBVfs\
+    wlCU1r1LA8uvsTALAkxNzaEMsiAMSc+bmMugoAQ2z/Csw6ADwUyp00cMHY4/8TAD4KnelxJaqo/mkEQ\
+    OAbUgaY9pZtPOBfFR/q+7cjAGJBBgbLfbdkSf13xiA4doNjIjSmwoMfDDEZykThEEsyHKbEuBLkMmiy\
+    UjROiRmYBj8pCg5DygiZAkyW/8aFEStS0BuADNeYC0tijH3mlsao9BCWxzIXRwEA69M9xDo6nLV9dfH\
+    9dojEnBk6N0goMHgBa2cxFdY+5/Y2Z+0RWpKX+SCWgEjAw6B7aYuO2+QcPh5DPCi9UVKxYePxlZ4Gg8\
+    pbZbXefRwtfhblnSterr3CCgDBEIZ96RkI4Kc128vz3qIAaJKES3W9ObwUHQufa/ABQIG8KzcbHY0Jn\
+    Fx74qNbGQDgT+9wT4h8oQuF/v2GECdNvUpZAFQIXQze0BYQVBz5W161tl6uCoCyolngfk1ljmR2HJzE\
+    CyuVUACgBJXHDddq9AgsvilEO9fD1p0BwFaEAxcXhDhAzX2VwkkPIvtUyOtMYBGhIT0gSx6ecU5I5xh\
+    WzIs8V3ComFqUilIYu78PZeks5f4Dt0STlGotoIkAAAAASUVORK5CYII=";
+
+    var setShadow = function(object) {
+        var s = new enchant.gl.primitive.PlaneXZ();
+        s.mesh.texture.ambient = [1,1,1,1];
+        s.mesh.texture.diffuse = [0,0,0,1];
+        s.mesh.texture.specular = [0,0,0,1];
+        s.mesh.texture.src = SHADOW_DATA;
+        s.on("enterframe", function() {
+            this.x = 0;
+            this.y = -object.y + -0.49;
+            this.z = 0;
+        });
+        object.addChild(s);
+        object.shadow = s;
+    };
+
+    enchant.gl.extension.setControlTPS = function(player, opt) {
+        opt = opt || {};
+        opt.speed = opt.speed || 0.5;
+        opt.turnSpeed = opt.turn || 0.1;
+        opt.jumpSpeed = opt.jumpSpeed || 0.6;
+        opt.gravity = opt.gravity || 0.1
+        opt.cameraPosition = opt.cameraPosition || -10;
+        opt.cameraSpeed = opt.cameraSpeed || 8;
+
+        var game = enchant.Game.instance;
+        var camera = player.scene.getCamera();
+
+        game.keybind("Z".charCodeAt(0), "a");
+
+        player.velocityY = 0;
+        player.on("enterframe", function() {
+            if (game.input.up) {
+                player.forward(+opt.speed);
+            } else if (game.input.down) {
+                player.forward(-opt.speed);
+            }
+            if (game.input.left) {
+                player.rotateYaw(+opt.turnSpeed);
+            } else if (game.input.right) {
+                player.rotateYaw(-opt.turnSpeed);
+            }
+
+            this.y += this.velocityY;
+            if (this.y === 0 && game.input.a) {
+                this.velocityY = opt.jumpSpeed;
+            } else if (this.y <= 0) {
+                this.velocityY = 0;
+                this.y = 0;
+            } else {
+                this.velocityY -= opt.gravity;
+            }
+            
+            camera.chase(this, opt.cameraPosition, opt.cameraSpeed);
+            camera.y = this.y + 1;
+            camera.lookAt(this);
+        });
+        setShadow(player);
+    };
+
+})(enchant);
