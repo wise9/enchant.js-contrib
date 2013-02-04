@@ -217,7 +217,7 @@ enchant.gl.Sprite3D.prototype.getDirectionXZ = function() {
 };
 
 (function(enchant) {
-    // extend Sprite3D constructor
+    // extend Sprite3D constructor for timeline animation.
     var orig = enchant.gl.Sprite3D.prototype.initialize;
     enchant.gl.Sprite3D.prototype.initialize = function() {
         orig.apply(this, arguments);
@@ -733,7 +733,7 @@ WzIs8V3ComFqUilIYu78PZeks5f4Dt0STlGotoIkAAAAASUVORK5CYII=";
         s.mesh.texture.src = SHADOW_DATA;
         s.on("enterframe", function() {
             this.x = 0;
-            this.y = -object.y + -0.49;
+            this.y = -object.y + -0.99;
             this.z = 0;
         });
         object.addChild(s);
@@ -748,7 +748,7 @@ WzIs8V3ComFqUilIYu78PZeks5f4Dt0STlGotoIkAAAAASUVORK5CYII=";
         opt.speed = opt.speed || 0.5;
         opt.turnSpeed = opt.turnSpeed || 0.1;
         opt.jumpSpeed = opt.jumpSpeed || 0.6;
-        opt.gravity = opt.gravity || 0.1
+        opt.gravity = opt.gravity || 0.1;
         opt.cameraPosition = opt.cameraPosition || -10;
         opt.cameraSpeed = opt.cameraSpeed || 8;
 
@@ -795,7 +795,7 @@ WzIs8V3ComFqUilIYu78PZeks5f4Dt0STlGotoIkAAAAASUVORK5CYII=";
         opt.speed = opt.speed || 0.5;
         opt.turnSpeed = opt.turnSpeed || 0.1;
         opt.jumpSpeed = opt.jumpSpeed || 2.0;
-        opt.gravity = opt.gravity || 0.2
+        opt.gravity = opt.gravity || 0.2;
         opt.cameraPosition = opt.cameraPosition || -10;
         opt.cameraSpeed = opt.cameraSpeed || 8;
 
@@ -892,7 +892,9 @@ WzIs8V3ComFqUilIYu78PZeks5f4Dt0STlGotoIkAAAAASUVORK5CYII=";
             for (var i = 0, end = this.mesh.texCoords.length; i < end; i++) {
                 this.mesh.texCoords[i] *= 5;
             }
-            if (texture) this.mesh.texture.src = texture;
+            if (texture) {
+                this.mesh.texture.src = texture;
+            }
             this.y = -1;
         }
     });
